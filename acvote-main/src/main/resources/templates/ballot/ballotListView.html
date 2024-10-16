@@ -1,0 +1,280 @@
+<#import "/main_layout.html" as layout />
+
+<@layout.stdpage title="AC Vote | Ballots" jsfile="ballot.js">
+
+	<div class="container-fluid mb-5">
+
+		<form style="display: none" action="/acvote/ballots/flash" method="POST" id="flasher">
+			<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+			<input type="hidden" id="flash-msg" name="msg" value="" />
+		</form>
+
+		<!-- Header with Title instructions and new ballot button -->
+		<div class="row mb-5">
+			<div class="col-md-6">
+				<h1>Ballot List</h1>
+				<p>Create, View, Duplicate, Delete, and Publish Ballots</p>
+			</div>
+			<div class="col-md-6">
+				<div class="d-flex justify-content-end">
+					<button id="dropdownCreateBallot" class="btn btn-lg btn-ACred dropdown-toggle" type="button"
+						data-bs-toggle="dropdown" aria-expanded="false">Create Ballot</button>
+					<ul id="createMenu" class="dropdown-menu">
+						<li><a id="btnCreateBallot" class="dropdown-item" href="#">Create from Scratch</a></li>
+						<li><a id="btnCreateFromTemplate" class="dropdown-item" href="#" data-bs-toggle="modal"
+								data-bs-target="#createFromTempModal">Create from Template</a></li>
+					</ul>
+				</div>
+			</div>
+		</div>
+
+		<!-- Ballot table -->
+		<table class="table table-striped table-hover ballotTable">
+			<thead>
+				<tr class="bg-dark text-white">
+					<th>ID</th>
+					<th>Title</th>
+					<th>Polls Close</th>
+					<th>Status</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody id="ballotTable">
+				<#list ballots as ballot>
+					<tr class="listedBallot align-middle" bid="${ballot.id}" style="height: 4em">
+						<td>${ballot.id}</td>
+						<td>${ballot.title}</td>
+						<td class="dateTime">${ballot.endTime}</td>
+						<td>
+							<#assign fillPercentage=(votes.votesPercentage(ballot.id)?string("##"))>
+								<div class="progress">
+									<div class="progress-bar rounded" role="progressbar"
+										style="width: ${fillPercentage}%; background-color: #981E32;"
+										aria-valuenow="${fillPercentage}" aria-valuemin="0" aria-valuemax="100">
+										${fillPercentage}%</div>
+								</div>
+								${votes.votesReceived(ballot.id)} of ${votes.votesExpected(ballot.id)}
+						</td>
+						<td>
+							<div class="dropdown">
+								<button id="dropdownBut" class="btn btn-light dropdown-toggle btn-elipse" type="button"
+									data-bs-toggle="dropdown" aria-expanded="false">
+									...
+								</button>
+								<ul class="dropdown-menu">
+									<li><a id="viewDetailsBut" class="dropdown-item"
+											href="/acvote/ballot?bid=${ballot.id?c}">View Details</a>
+									</li>
+									<li><a class="dropdown-item" href="/acvote/ballot/${ballot.id?c}/results">View
+											Results</a></li>
+									<li class="dropdown-divider"></li>
+									<li><a id="btnRemindVoters" class="dropdown-item" href="#" data-bs-toggle="modal"
+											data-bs-target="#remindVotersModal"
+											onClick="fillRemindVotersModal(${ballot.id})">Remind Voters</a></li>
+									<li class="dropdown-divider"></li>
+									<li><a class="dropdown-item" href="#"
+											onClick="createTemplateFromBallot(${ballot.id?c})">Make Template</a></li>
+									<li><a class="dropdown-item" href="#" onClick="deleteFromList(${ballot.id})"
+											data-bs-toggle="modal" data-bs-target="#deleteModal">Delete</a></li>
+								</ul>
+							</div>
+						</td>
+					</tr>
+					<#else>
+						<tr>
+							<td>-1</td>
+							<td>No Ballots to display!</td>
+							<td>N/A</td>
+							<td>N/A</td>
+							<td> </td>
+						</tr>
+				</#list>
+			</tbody>
+		</table>
+
+
+		<!--Delete modal-->
+		<div id="deleteModal" class="modal fade" role='dialog'>
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h4 class="modal-title">Delete</h4>
+						<button type="button" class="close" data-bs-dismiss="modal" aria-hidden="true">×</button>
+					</div>
+					<div class="modal-body">
+						<p id="fillInTitle">Loading...</p>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+						<button id="btnDeleteBallot" type="button" class="btn btn-ACred"
+							data-bs-dismiss="modal">Delete</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!--Create Ballot From Template Table-->
+		<div id="createFromTempModal" class="modal fade" role='dialog'>
+			<div class="modal-dialog modal-dialog-centered modal-fullscreen">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h4 class="modal-title">Choose a template</h4>
+						<button type="button" class="close" data-bs-dismiss="modal" aria-hidden="true">×</button>
+					</div>
+					<div id="fillinBody" class="modal-body">
+						<p>Click on the template you would like the ballot to use</p>
+						<table class="table table-striped table-hover singleSelectDataTable" id="templateList">
+							<thead>
+								<tr>
+									<th scope="col">ID</th>
+									<th scope="col">Title</th>
+									<th scope="col">Ballot Title</th>
+								</tr>
+							</thead>
+							<tbody>
+								<#list templates as t>
+									<tr class="listedTemplate align-middle" tid="${t.id}">
+										<td>${t.id}</td>
+										<td>${t.templateTitle}</td>
+										<td>${t.ballotTitle}</td>
+									</tr>
+									<#else>
+										<tr>
+											<td>-1</td>
+											<td>No Templates to display!</td>
+											<td>N/A</td>
+											<td>N/A</td>
+										</tr>
+								</#list>
+							</tbody>
+						</table>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+						<button id="btnCreateBallotFromTemplate" type="button" class="btn btn-ACred">Create</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!--Remind Voters modal-->
+		<div id="remindVotersModal" class="modal fade modal-xl modal-fullscreen" role="dialog" aria-modal="true">
+			<div class="modal-dialog modal-dialog-centered">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h4 class="modal-title">Remind Voters</h4>
+						<button type="button" class="close" data-bs-dismiss="modal" aria-hidden="true">×</button>
+					</div>
+					<div class="modal-body">
+						<p id="body">Remind your voters and send an (optional) message</p>
+						<label for="remindVotersMessage">Message:</label>
+						<input type="text" id="remindVotersMessage"></input>
+						<!-- Faculty table -->
+						<table id="votingFacultyTable" class="table table-striped table-hover multiSelectDataTable">
+							<button id="btnSelectRemindAllVoters" type="button"
+								class="btn btn-sm btn-secondary m-2">Select All</button>
+							<button id="btnDeselectRemindAllVoters" type="button"
+								class="btn btn-sm btn-secondary m-2">Deselect All</button>
+							<thead>
+								<tr class="bg-black text-white">
+									<th>AC ID</th>
+									<th>Last Name</th>
+									<th>First Name</th>
+									<th>Department</th>
+									<th>Division</th>
+									<th>Rank</th>
+									<th>Email</th>
+									<th>Tenure</th>
+									<th>Voting</th>
+									<th>Active</th>
+								</tr>
+							</thead>
+							<tbody id="votingFacultyList">
+							</tbody>
+						</table>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+						<button id="btnRemindVotersSend" type="button" class="btn btn-ACred"
+							data-bs-dismiss="modal">Send</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+
+	</div>
+
+
+	<script>
+
+		//Makes the button perfom its action rather than the row
+		function dropdownClick(event) {
+			$('.dropdown-toggle').dropdown();
+
+			event.stopPropagation();
+		}
+
+		$(document).ready(function () {
+
+			flashMessage("${message!''}");
+
+			//ballot nav item highlighted
+			$("#ballotLink").addClass("active");
+
+			//Adds delete fucntionality to delete button in delete modal 
+			$("#btnDeleteBallot").click(deleteBallot);
+
+			//Adds create functionality to create button
+			$("#btnCreateBallot").click(createBallot);
+
+			//Adds create functionality to create from ballot button
+			$("#btnCreateBallotFromTemplate").click(createBallotFromTemplate);
+
+			//Shows elipse button when user hovers over row 
+			$('.listedBallot').on('mouseover', function () {
+				$(this).find("button").show();
+			});
+
+			//Hides elipse button when user exits row 
+			$('.listedBallot').on('mouseout', function () {
+				$(this).find("button").hide();
+			});
+
+			//Adds click event to all ballot elipse buttons
+			$('.btn-elipse').click(dropdownClick);
+
+			//Hides all elipse buttons
+			$('.btn-elipse').hide();
+
+			//Adds create functionality to create button
+			$("#btnRemindVotersSend").click(remindVoters);
+
+			$("#btnSelectRemindAllVoters").click(selectRemindAllVoters);
+
+			$("#btnDeselectRemindAllVoters").click(deselectRemindAllVoters);
+
+		});
+
+		// on table draw
+		$('.dataTable').on('draw.dt', function () {
+			//Shows elipse button when user hovers over row 
+			$('.listedBallot').on('mouseover', function () {
+				$(this).find("button").show();
+			});
+
+			//Hides elipse button when user exits row 
+			$('.listedBallot').on('mouseout', function () {
+				$(this).find("button").hide();
+			});
+
+			//Adds click event to all ballot elipse buttons
+			$('.btn-elipse').click(dropdownClick);
+
+			//Hides all elipse buttons
+			$('.btn-elipse').hide();
+		})
+
+	</script>
+
+</@layout.stdpage>

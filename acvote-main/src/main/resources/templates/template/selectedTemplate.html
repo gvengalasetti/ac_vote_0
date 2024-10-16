@@ -1,0 +1,155 @@
+<#import "/main_layout.html" as layout />
+
+<@layout.stdpage title="AC Vote | Template Details" cssfile="selectedBallot.css" jsfile="template.js">
+
+	<div class="container mb-5">
+
+		<form style="display: none" action="/acvote/template/flash" method="POST" id="flasher">
+			  <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+			  <input type="hidden" id="flash-msg" name="msg" value=""/>
+			  <input type="hidden" name="tid" value="${template.id?c}"/>
+		</form>
+
+		<div class="row mb-2">
+			<div class="col-md-6">
+				<h1>Template Details</h1>
+				<p>Click on template fields to edit</p>
+				<a id="returnLink" href="/acvote/templates"> &lt;- Back to Template List</a>
+			</div>
+			<div class="col-md-6">
+				<div class="d-flex justify-content-end">
+					<button type="button" class="btn btn-lg btn-danger" data-bs-toggle="modal"
+						data-bs-target="#deleteModal">Delete</button>
+				</div>
+			</div>
+		</div>
+		<hr/>
+		
+		<div id="idHolder" class="row text-end" tid="${template.id?c}">
+			<div class="row">
+				<div class="col-4">
+					<p><b>Template ID</b></p>
+				</div>
+				<div class="col-8 text-start">
+					<p>${template.id?c}</p>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-4">
+					<p id="instructionsLabel"><b>Template Title</b></p>
+				</div>
+				<div id="tTitle" class="col-8 text-start" onClick="editTemplateTitle()">
+					<p id="tTitleText" class="tTitle hov">${template.templateTitle}</p>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-4">
+					<p><b>Ballot Title</b></p>
+				</div>
+				<div id="bTitle" class="col-8 text-start" onClick="editBallotTitle()">
+					<p id="bTitleText" class="bTitle hov">${template.ballotTitle}</p>
+				</div>
+			</div>
+			<div class="row mb-3">
+				<div class="col-4">
+					<p><b>Ballot Description</b></p>
+				</div>
+				<div id="description" class="col-8 text-start" onClick="editDescription()">
+					<div id="descText" class="desc hov">${template.description}</div>
+				</div>
+			</div>
+			<div class="row mb-3">
+				<div class="col-4">
+					<p><b>Ballot Instructions</b></p>
+				</div>
+				<div id="instructions" class="col-8 text-start" onClick="editInstructions()">
+					<div id="instrText" class="instr hov">${template.instructions}</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-4">
+					<p id="voteTypeLabel"><b>Vote Type</b></p>
+				</div>
+				<div id="voteType" class="col-2">
+					<select id="voteTypeSelect" init="${template.typeOfVote}" name="basis"
+						class="form-select form-select-sm hov" aria-label=".form-select-sm" onchange="editVoteType()">
+						<#if template.typeOfVote=='IRV'>
+						<option value="IRV" selected="selected">IRV</option>
+						<#else>
+						<option value="IRV">IRV</option>
+						</#if>
+						
+						<#if template.typeOfVote=='IRV2'>
+						<option value="IRV2" selected="selected">IRV2</option>
+						<#else>
+						<option value="IRV2">IRV2</option>
+						</#if>
+					</select>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-4">
+					<p><b>Outcomes</b></p>
+				</div>
+				<div id="outcomes" class="col-8 text-start" onClick="editOutcomes()">
+					<p id="outcomesText" class="outcomes hov">${template.outcomes}</p>
+				</div>
+			</div>
+			<div class="row">
+				<div id="bottom" class="col-4">
+					<p><b>Options Basis</b></p>
+				</div>
+				<div id="basis" class="col-2">
+					<select id="basisSelect" init="${template.basis?c}" name="basis"
+						class="form-select form-select-sm hov" aria-label=".form-select-sm" onchange="editBasis()">
+						<#if template.basis>
+							<option value="true" selected="selected">Faculty Options</option>
+							<option value="false">Custom Options</option>
+							<#else>
+								<option value="true">Faculty Options</option>
+								<option value="false" selected="selected">Custom Options</option>
+						</#if>
+					</select>
+				</div>
+			</div>
+		</div>
+
+
+		<!-- Delete modal -->
+		<div id="deleteModal" class="modal fade" role="dialog">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h4 class="modal-title">Delete</h4>
+						<button type="button" class="close" data-bs-dismiss="modal" aria-hidden="true">×</button>
+					</div>
+					<div id="confirm-contents" class="modal-body">
+						<p>Do you really want to delete this template?</p>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+						<button onClick="fillDeleteModal(${template.id?c})" id="btnDeleteTemplate" type="button" class="btn btn-ACred" data-bs-dismiss="modal">Delete</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		
+	</div>
+	
+
+	<script>
+		// on document load
+		$(document).ready(function () {
+			
+		flashMessage("${message!''}");
+
+		//assigns delete elipse button delete function
+		$("#btnDeleteTemplate").click(deleteTemplate);
+		
+		});
+		
+		
+	</script>
+	
+</@layout.stdpage>

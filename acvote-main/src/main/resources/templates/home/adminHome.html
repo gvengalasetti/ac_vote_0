@@ -1,0 +1,91 @@
+<#import "/main_layout.html" as layout />
+
+<@layout.stdpage title="AC Vote | Home">
+
+	<!-- Page Content -->
+	<div class="container-fluid">
+		<div class="container-fluid text-left">
+			<div class="row content">
+
+			<#if !userroles?seq_contains("ROLE_ADMIN") && !userroles?seq_contains("ROLE_EDITOR") && !userroles?seq_contains("ROLE_VIEWER")  >
+			<div class="col-sm-12 text-left">
+				Oops. Voting info is missing. We cannot help you vote here. Please use the URL link found in your voting email.
+			</div>
+			<#else>
+					
+
+				<div class="col-sm-12 text-left">
+					<div class="row border-bottom border-dark ">
+						<h1>Welcome To AC Vote</h1>
+						<p>
+							A tool to facilitate faculty voting at Austin College
+						</p>
+					</div>
+					
+					<div class="row border-bottom border-dark">
+					<p  class="col-sm-4" >
+						<a href="/acvote/ballots">Manage Ballots:</a></p> 
+					<p class="col-sm-8">Create new ballots, view existing ballots, send out
+						ballots to voters, and view voting results</p>
+					</div>
+					
+					<div class="row border-bottom border-dark ">	
+					  <p class="col-sm-4">
+						  <a href="/acvote/templates">Manage Templates:</a></p> 
+					  <p class="col-sm-8">To create and edit templates for fast ballot creation</p>
+					</div>
+					
+					<#if userroles?seq_contains("ROLE_ADMIN")>
+					<div class="row border-bottom border-dark ">	
+					  <p class="col-sm-4" >
+						  <a href="/acvote/faculty/list">Manage Faculty:</a>
+					  </p>
+					  <p class="col-sm-8">To manage faculty and voters. At the very least, we
+						need to update at the beginning of each semester.
+					  </p>
+					</div>
+					
+					<div class="row border-bottom border-dark ">	
+					<p class="col-sm-4">
+						<a href="/acvote/users">Manage Users:</a></p>
+						<p class="col-sm-8">To manage who can login to prepare ballots and view
+						results.
+						</p>
+					</div>
+					</#if>
+					
+					<!-- Example IRV Vote Cast -->
+					<div class="row border-bottom border-dark ">	
+					<p class="col-sm-4">
+						<a id="voteIRVLink" href="/acvote/voter/vote?bid=3&token=0d354582ca957a881ac85b7dfdbe8163">IRV Vote Cast Example:</a></p>
+						<p class="col-sm-8">Example of the page seen by voter about to cast their IRV vote.
+						</p>
+					</div>
+					
+					<!-- Example IRV2 Vote Cast -->
+					<div class="row border-bottom border-dark ">	
+					<p class="col-sm-4">
+						<a id="voteIRV2Link" href="/acvote/voter/vote?bid=4&token=0cfd26b73161d6d2d1b76832a2a72a32">IRV2 Vote Cast Example:</a></p>
+						<p class="col-sm-8">Example of the page seen by voter about to cast their IRV2 vote.
+						</p>
+					</div>
+					
+				</div>
+			</#if>
+			
+			</div>
+		</div>
+	</div>
+	
+	<script>
+		
+		$(document).ready(function() {
+			
+			$("#homeLink").addClass("active");
+			
+		});
+		
+	</script>
+
+
+</@layout.stdpage>

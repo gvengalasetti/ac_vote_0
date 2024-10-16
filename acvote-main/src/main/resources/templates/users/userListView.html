@@ -1,0 +1,177 @@
+<#import "/main_layout.html" as layout />
+
+<@layout.stdpage title="AC Vote | Users" jsfile="users.js" cssfile="selectedBallot.css">
+
+	<div class="container-fluid mb-5">
+		
+		<form style="display: none" action="/acvote/users/flash" method="POST" id="flasher">
+			  <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+			  <input type="hidden" id="flash-msg" name="msg" value=""/>
+		</form>
+
+
+		<!-- Header with Title instructions  -->
+		<div class="row mb-5">
+			<div class="col-md-6">
+				<h1>User List</h1>
+				<p>Create, View, and Delete Users</p>
+			</div>
+			<div class="col-md-6">
+				<div class="d-flex justify-content-end">
+					<button id="startCreate" type="button" class="btn btn-lg btn-ACred" data-bs-toggle="modal"
+						data-bs-target="#createModal">Create User</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- User table -->
+		<table class="table table-striped table-hover dataTable">
+			<thead>
+				<tr class="bg-dark text-white">
+					<th>User ID</th>
+					<th>Role</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody id="userTable">
+				<#list users as user>
+					<tr class="listedUser align-middle" uid="${user.uid}" style="height: 4em">
+						<td>${user.uid}</td>
+						<td>${user.role}</td>
+						<td>
+							<div class="dropdown">
+								<button id="dropdownBut" class="btn btn-light dropdown-toggle btn-elipse" type="button"
+									data-bs-toggle="dropdown" aria-expanded="false">
+									...
+								</button>
+								<ul class="dropdown-menu">
+									<li><a id="deleteUserBtn" class="dropdown-item" href="#"
+											onClick="deleteUserFromList('${user.uid}')" data-bs-toggle="modal"
+											data-bs-target="#deleteModal">Delete</a></li>
+								</ul>
+							</div>
+						</td>
+					</tr>
+					<#else>
+						<tr>
+							<td>No User Id to Display</td>
+							<td>No Users to display!</td>
+							<td> </td>
+						</tr>
+				</#list>
+			</tbody>
+		</table>
+
+		<!--Delete modal-->
+		<div id="deleteModal" class="modal fade" role="dialog">
+			<div class="modal-dialog modal-dialog-centered">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h4 class="modal-title">Delete</h4>
+						<button type="button" class="close" data-bs-dismiss="modal" aria-hidden="true">×</button>
+					</div>
+					<div class="modal-body">
+						<p id="fillInTitle">Loading...</p>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+						<button id="btnDeleteUser" type="button" class="btn btn-ACred"
+							data-bs-dismiss="modal">Delete</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Create user modal -->
+		<div id="createModal" class="modal fade" role="dialog">
+			<div class="modal-dialog modal-dialog-centered">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h4 class="modal-title">Create</h4>
+						<button type="button" class="close" data-bs-dismiss="modal" aria-hidden="true">×</button>
+					</div>
+					<div class="modal-body text-end">
+						<div id="uidBox" class="row">
+							<div class="col-4">
+								<p>User ID</p>
+							</div>
+							<div class="col-8 text-start">
+								<input type="text" id="uidInput" maxLength="32" />
+							</div>
+						</div>
+						<div id="roleBox" class="row">
+							<div class="col-4">
+								<p>Role</p>
+							</div>
+							<div class="col-8 text-start">
+								<select id="roleSelect" name="role" class="form-select form-select-sm"
+									aria-label=".form-select-sm">
+									<option value="ADMIN">ADMIN</option>
+									<option value="EDITOR">EDITOR</option>
+								</select>
+							</div>
+						</div>
+						<div id="alertBox" class="row text-center" hidden="true">
+							<div class="col">
+								<div id="alert-content" class="alert alert-danger">Loading...</div>
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+						<button id="btnCreateUser" type="button" class="btn btn-ACred">Create</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+
+	<script>
+		
+		// Makes button perform action rather than row
+		function dropdownClick(event) {
+			$('.dropdown-toggle').dropdown();
+
+			event.stopPropagation();
+		}
+	
+		$(document).ready(function () {
+
+			flashMessage("${message!''}");
+
+			$("#userLink").addClass("active");
+
+			//giving functions to CRUD buttons
+			$("#btnCreateUser").click(createUser);
+
+			$("#btnDeleteUser").click(deleteUser);
+
+		});
+		
+		// on table draw
+		$('.dataTable').on('draw.dt', function() {
+			//Shows elipse button when user hovers over row 
+			$('.listedUser').on('mouseover', function () {
+				$(this).find("button").show();
+			});
+
+			//Hides elipse button when user exits row 
+			$('.listedUser').on('mouseout', function () {
+				$(this).find("button").hide();
+			});
+
+			//Adds click event to all ballot elipse buttons
+			$('.btn-elipse').click(dropdownClick);
+
+			//Hides all elipse buttons
+			$('.btn-elipse').hide();
+		})
+
+	</script>
+
+
+
+
+
+</@layout.stdpage>

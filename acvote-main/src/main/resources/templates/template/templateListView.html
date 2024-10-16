@@ -1,0 +1,155 @@
+<#import "/main_layout.html" as layout />
+
+<@layout.stdpage title="AC Vote | Templates" jsfile="template.js">
+
+	<div class="container-fluid mb-5">
+
+		<form style="display: none" action="/acvote/templates/flash" method="POST" id="flasher">
+			  <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+			  <input type="hidden" id="flash-msg" name="msg" value=""/>
+		</form>
+
+		<!-- Header with title, instructions, and new template button -->
+		<div class="row mb-5">
+			<div class="col-md-6">
+				<h1>Template List</h1>
+				<p>Create, View, and Delete Ballot Templates</p>
+			</div>
+			<div class="col-md-6">
+				<div class="d-flex justify-content-end">
+					<button id="btnCreateTemplate" class="btn btn-lg btn-ACred" type="button">Create
+						Template</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- Template table -->
+		<table class="table table-striped table-hover dataTable">
+			<thead>
+				<tr class="bg-dark text-white">
+					<th>ID</th>
+					<th>Title</th>
+					<th>Ballot Title</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody id="templateTable">
+				<#list templates as t>
+					<tr class="listedTemplate align-middle" tid="${t.id}" style="height: 4em">
+						<td>${t.id}</td>
+						<td>${t.templateTitle}</td>
+						<td>${t.ballotTitle}</td>
+						<!--Ellipse Dropdown Buttons-->
+						<td>
+							<div class="dropdown">
+								<button id="dropdownBut" class="btn btn-light dropdown-toggle btn-elipse" type="button"
+									data-bs-toggle="dropdown" aria-expanded="false">
+									...
+								</button>
+								<ul class="dropdown-menu">
+									<li><a id="viewDetailsBtn" class="dropdown-item"
+											href="/acvote/template?tid=${t.id}">View Details</a></li>
+									<li><a class="dropdown-item" href="#" onClick="fillDeleteModal(${t.id})"
+											data-bs-toggle="modal" data-bs-target="#deleteModal">Delete</a></li>
+								</ul>
+							</div>
+						</td>
+					</tr>
+					<#else>
+						<tr>
+							<td>-1</td>
+							<td>No Templates to display!</td>
+							<td>N/A</td>
+							<td>N/A</td>
+						</tr>
+				</#list>
+			</tbody>
+		</table>
+
+		<!--Delete modal-->
+		<div id="deleteModal" class="modal fade" role='dialog'>
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h4 class="modal-title">Delete</h4>
+						<button type="button" class="close" data-bs-dismiss="modal" aria-hidden="true">×</button>
+					</div>
+					<div class="modal-body">
+						<p id="fillInTitle">Loading...</p>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+						<button id="btnDeleteTemplate" type="button" class="btn btn-ACred"
+							data-bs-dismiss="modal">Delete</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+
+	</div>
+
+
+	<script>
+
+		// Makes button perform action rather than row
+		function dropdownClick(event) {
+			$('.dropdown-toggle').dropdown();
+
+			event.stopPropagation();
+		}
+
+		// on document load
+		$(document).ready(function () {
+
+			flashMessage("${message!''}");
+
+			//template nav item highlighted
+			$("#templateLink").addClass("active");
+
+			//assigns delete elipse button delete function
+
+			// Show elipse button when user hovers over row
+			$('.listedTemplate').on('mouseover', function () {
+				$(this).find("button").show();
+			});
+
+			$('#btnCreateTemplate').click(createTemplate);
+
+			$("#btnDeleteTemplate").click(deleteTemplate);
+
+			// hide elipse button when user exits row
+			$('.listedTemplate').on('mouseout', function () {
+				$(this).find("button").hide();
+			});
+
+			// add click even to all ballot elipse buttons
+			$('.btn-elipse').on('click', dropdownClick);
+
+			// Hide all elipse buttons
+			$('.btn-elipse').hide();
+		});
+		
+		// on table draw
+		$('.dataTable').on('draw.dt', function() {
+			//Shows elipse button when user hovers over row 
+			$('.listedTemplate').on('mouseover', function () {
+				$(this).find("button").show();
+			});
+
+			//Hides elipse button when user exits row 
+			$('.listedTemplate').on('mouseout', function () {
+				$(this).find("button").hide();
+			});
+
+			//Adds click event to all ballot elipse buttons
+			$('.btn-elipse').click(dropdownClick);
+
+			//Hides all elipse buttons
+			$('.btn-elipse').hide();
+		})
+
+
+	</script>
+
+</@layout.stdpage>

@@ -1,0 +1,232 @@
+<#import "/main_layout.html" as layout />
+
+<@layout.stdpage title="AC Vote | Faculty" jsfile="faculty.js">
+
+	<div class="container-fluid mb-5">
+
+		<form style="display: none" action="/acvote/faculty/list/flash" method="POST" id="flasher">
+			  <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+			  <input type="hidden" id="flash-msg" name="msg" value=""/>
+		</form>
+
+
+		<!-- Header with Title instructions and new faculty button -->
+		<div class="row mb-3">
+			<div class="col-md-6">
+				<h1>Faculty List</h1>
+				<p>Create, View, and Delete Faculty</p>
+			</div>
+			<div class="col-md-6">
+				<div class="d-flex justify-content-end">
+					<button id="createFacBtn" type="button" class="btn btn-lg btn-ACred" data-bs-toggle="modal"
+						data-bs-target="#addFacultyModal">New Faculty</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- Table with aggregate faculty info and csv import -->
+		<div class="row mb-5">
+			<div class="col-sm-2">
+				<table class="table table-sm table-borderless">
+					<tbody>
+						<tr>
+							<td><b>Quorum</b></td>
+							<#assign vnum = faculty?filter(x -> x.voting)?size />
+							<td id="quorumNum">${ (vnum/2 + 1) ?floor}</td>
+						</tr>
+						<tr>
+							<td>Total Faculty</td>
+							<td id="facNum">${faculty?size}</td>
+						</tr>
+						<tr>
+							<td>Voting Faculty</td>
+							<td id="votingNum">${vnum}</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<div class="col-md-10">
+				<div class="d-flex justify-content-end">
+					<form method="POST" action="/acvote/faculty/import" enctype="multipart/form-data">
+						<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+						<label>Import from CSV: </label>
+						<div style="border-width: 3px; border-style:solid; border-color: black; display: inline-block;">
+							<input type="file" id="CSVimport" name="file" />
+							<input type="submit" />
+						</div>
+						<div class="row">
+						<p class=" d-flex justify-content-end text-secondary">Last Import: <span id="mriDate">${mridate!"unknown"}</span></p>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+
+		<!-- Faculty table -->
+		<table class="table table-striped table-hover dataTable">
+			<thead>
+				<tr class="bg-dark text-white">
+					<th>AC ID</th>
+					<th>Last Name</th>
+					<th>First Name</th>
+					<th>Department</th>
+					<th>Division</th>
+					<th>Rank</th>
+					<th>Email</th>
+					<th>Tenure</th>
+					<th>Voting</th>
+					<th>Active</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody id="facultyTable">
+				<#list faculty as f>
+					<tr class="listedFaculty align-middle" acId="${f.acId}" style="height: 4em">
+						<td>${f.acId}</td>
+						<td>${f.lastName}</td>
+						<td>${f.firstName}</td>
+						<td>${f.dept}</td>
+						<td>${f.div}</td>
+						<td>${f.rank}</td>
+						<td>${f.email}</td>
+						<td>${f.tenure!""}</td>
+						<td>${f.voting?c}</td>
+						<td>${f.active?c}</td>
+						<td>
+							<div class="dropdown">
+								<button class="btn btn-light dropdown-toggle btn-elipse" type="button"
+									data-bs-toggle="dropdown" aria-expanded="false">
+									...
+								</button>
+								<ul class="dropdown-menu">
+									<li><a class="dropdown-item" href="/acvote/faculty/details?acId=${f.acId}">View
+											Details</a></li>
+									<li><a class="dropdown-item" href="#" data-bs-toggle="modal"
+											data-bs-target="#deleteModal"
+											onclick="deleteFromList('${f.acId}')">Delete</a></li>
+								</ul>
+							</div>
+						</td>
+					</tr>
+					<#else>
+						<tr>
+							<td>-1</td>
+							<td>No Faculty</td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+						</tr>
+				</#list>
+			</tbody>
+		</table>
+
+
+		<!--Delete modal-->
+		<div id="deleteModal" class="modal fade" role='dialog'>
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h4 class="modal-title">Delete</h4>
+						<button type="button" class="close" data-bs-dismiss="modal" aria-hidden="true">×</button>
+					</div>
+					<div id="confirm-contents" class="modal-body">
+						<p>Do You Really Want to Delete This Faculty?</p>
+
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+						<button id="btnDeleteFaculty" type="button" class="btn btn-ACred"
+							data-bs-dismiss="modal">Delete</button>
+					</div>
+
+				</div>
+			</div>
+		</div>
+
+		<!--Create modal-->
+		<div id="addFacultyModal" class="modal fade" role="dialog">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h4 class="modal-title">Add Faculty</h4>
+						<button type="button" class="close" data-bs-dismiss="modal" aria-hidden="true">×</button>
+					</div>
+					<div class="modal-body">
+						<p>Please enter the Austin College ID for the new faculty:</p>
+						<input id="facultyIdInput" type="text" class="form-control" maxlength="7" />
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+						<button id="btnAddFaculty" type="button" class="btn btn-ACred"
+							data-bs-dismiss="modal">Add</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+
+	</div>
+
+
+	<script>
+
+
+		function dropdownClick(event) {
+			$('.dropdown-toggle').dropdown();
+
+			event.stopPropagation();
+		}
+
+		$(document).ready(function () {
+
+			flashMessage("${message!''}");
+
+			$("#facultyLink").addClass("active");
+
+			//Adds delete fucntionality to delete button in delete modal 
+			$("#btnDeleteFaculty").click(deleteFaculty);
+
+			$("#btnAddFaculty").click(createFaculty);
+			
+			document.getElementById("facultyIdInput").addEventListener("input", function (event) {
+				// Get the current value of the input field
+				const currentValue = event.target.value;
+
+				// Remove any non-numeric characters from the input
+				const numericValue = currentValue.replace(/[^0-9]/g, "");
+
+				// Update the input field with the numeric value
+				event.target.value = numericValue;
+		
+			});
+		});
+
+		// on table draw
+		$('.dataTable').on('draw.dt', function () {
+			//Shows elipse button when user hovers over row 
+			$('.listedFaculty').on('mouseover', function () {
+				$(this).find("button").show();
+			});
+
+			//Hides elipse button when user exits row 
+			$('.listedFaculty').on('mouseout', function () {
+				$(this).find("button").hide();
+			});
+
+			//Adds click event to all ballot elipse buttons
+			$('.btn-elipse').click(dropdownClick);
+
+			//Hides all elipse buttons
+			$('.btn-elipse').hide();
+		})
+
+
+	</script>
+
+</@layout.stdpage>

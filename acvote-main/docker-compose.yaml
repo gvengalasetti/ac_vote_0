@@ -1,0 +1,8 @@
+
+services:
+  acvote:
+    build:
+      context: .
+    image: "acvote-snapshot"
+    ports:
+      - "8080:8080"

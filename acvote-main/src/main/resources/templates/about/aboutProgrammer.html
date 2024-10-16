@@ -1,0 +1,18 @@
+<#import "/main_layout.html" as layout />
+<@layout.stdpage title="Dev Details" >
+<div class="container">
+  <div class="row">
+    <div class="col">
+      <h1>${name!"I have a name"}</h1>
+    </div>
+  </div>
+  <div class="row">
+	  <div class ="col-auto">
+		  <img src= "${photoName!"https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Default_pfp.svg/2048px-Default_pfp.svg.png"}" alt= "${altName!"Placeholder Image"}" style="height:25rem"/>
+	  </div>
+    <div class="col">
+      <p>${description!"I am a CS 380 student."}</p>
+    </div>
+  </div>
+</div>
+</@layout.stdpage>

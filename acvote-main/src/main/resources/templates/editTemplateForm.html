@@ -1,0 +1,47 @@
+<!-- This file will be for the contents of the modal dialogue box within templateListView.html -->
+<h2>Edit Template</h2>
+<form class="form">
+	<!--Template Title-->
+	<div class="row">
+		<div class="col-md-6">
+			<label for="TemplateTitle">Title:</label>
+			<input id="titleBox" class="text" value="${ballotTemplate.templateTitle}"></input>
+		</div>
+	</div>
+	<!--Ballot Title-->
+	<div class="row-g-2">
+		<input class="col-md-6">
+			<label for="ballotTitle">Ballot Title:</label>
+			<input id="ballotTitleBox" class="text" value="${ballotTemplate.ballotTitle}"></input>			
+		</div>
+	</div>
+	<!--Instructions-->
+	<div class="row-g-2">
+		<div class="col-md-6">
+			<label for="instructions">Instructions:</label>
+			<input id="instructionsBox" class="text" value="${ballotTemplate.instuctions}"></input>
+		</div>
+	</div>
+	<!--Description-->
+	<div class="row-g-2">
+		<div class="col-md-6">
+			<label for="description">Description:</label>
+			<input id="descriptionBox" class="text" value="${ballotTemplate.description}"></input>
+		</div>
+	</div>
+	<!--Type of Vote-->
+	<div class="row-g-2">
+		<div class="col-md-6">
+			<label for="typeOfVote">Type of Vote:</label>
+			<input id="typeOfVoteBox" class="text" value="${ballotTemplate.typeOfVote}"></input>
+		</div>
+		
+	</div>
+	<!--voters-->
+	<div class="row-g-2">
+		<input class="col-md-6">
+			<label for="voters">Voters:</label>
+			<input id="votersBox" class="text" value="${ballotTemplate.voters}"></input>
+		</div>
+	</div>
+</form>
